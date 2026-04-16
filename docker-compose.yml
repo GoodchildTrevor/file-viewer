@@ -1,0 +1,12 @@
+services:
+  file-viewer:
+    build: .
+    container_name: file-viewer
+    restart: unless-stopped
+    ports:
+      - "${APP_PORT:-8070}:8070"
+    volumes:
+      - ${DOCS_DIR}:/app/documents
+      - ${CACHE_DIR:-./cache}:/app/cache
+    env_file:
+      - .env
