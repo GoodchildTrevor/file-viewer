@@ -92,8 +92,8 @@ def text_file_to_html(file_path: Path, highlight: str = "") -> str:
     """
     Convert text or markdown file to HTML with optional highlighting.
 
-    .md files are rendered as Markdown (with tables, fenced code, etc.).
-    .txt files are rendered as plain preformatted text.
+    Both .txt and .md files are rendered as Markdown
+    (with tables, fenced code blocks, TOC, etc.).
     
     :param file_path: Path to the text file
     :type file_path: Path
@@ -106,28 +106,14 @@ def text_file_to_html(file_path: Path, highlight: str = "") -> str:
     try:
         logger.debug(f"Reading text file: {file_path}")
         text = file_path.read_text(encoding="utf-8", errors="replace")
-        ext = file_path.suffix.lower()
 
-        if ext == ".md":
-            body = md_lib.markdown(
-                text,
-                extensions=["extra", "codehilite", "toc"],
-            )
-            if highlight:
-                body = highlight_text(body, highlight)
-            return f'<div class="markdown-body">{body}</div>'
-
-        # .txt — plain preformatted text
-        text = text.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
+        body = md_lib.markdown(
+            text,
+            extensions=["extra", "codehilite", "toc"],
+        )
         if highlight:
-            escaped = re.escape(highlight[:150])
-            text = re.sub(
-                f"({escaped})",
-                r'<mark style="background:#ffd700;color:#000;border-radius:3px;">\1</mark>',
-                text,
-                flags=re.IGNORECASE,
-            )
-        return f'<pre style="white-space:pre-wrap;font-size:13px;line-height:1.8;background:#1e1e2e;padding:20px;border-radius:8px;">{text}</pre>'
+            body = highlight_text(body, highlight)
+        return f'<div class="markdown-body">{body}</div>'
 
     except UnicodeDecodeError as e:
         logger.error(f"Encoding error reading {file_path}: {e}")
