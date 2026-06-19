@@ -12,5 +12,8 @@ pydantic-settings>=2.1.0
 # Document processing
 mammoth>=1.6.0
 
+# Markdown rendering
+markdown>=3.5.0
+
 # File system monitoring
 watchdog>=3.0.0
