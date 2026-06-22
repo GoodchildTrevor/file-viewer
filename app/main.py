@@ -8,6 +8,7 @@ import aiofiles
 from fastapi import FastAPI, HTTPException, BackgroundTasks, Query, Path, Request
 from fastapi.responses import HTMLResponse, FileResponse, RedirectResponse
 from fastapi.routing import APIRouter
+from starlette.routing import Route, WebSocketRoute, Mount
 
 from app.config import (
     logger, 
@@ -40,7 +41,16 @@ async def lifespan(app: FastAPI):
     ensure_directories()
     
     asyncio.create_task(asyncio.to_thread(clean_old_cache))
-    logger.info("Registered routes: %s", [route.path for route in app.routes])
+
+    routes_info = []
+    for route in app.routes:
+        if isinstance(route, (Route, WebSocketRoute)):
+            routes_info.append(f"{getattr(route, 'methods', {'WS'})} {route.path}")
+        elif isinstance(route, Mount):
+            routes_info.append(f"Mount: {route.path}")
+        else:
+            routes_info.append(f"{type(route).__name__}")
+    logger.info("Registered routes: %s", routes_info)
     
     try:
         files = list(DOCS_DIR.glob("*"))
